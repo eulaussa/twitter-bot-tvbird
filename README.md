@@ -21,6 +21,6 @@ Do you want to know the answer, just try to ask!
 
 ## 3) You say "I want to know more!", I say "Here you go!"
 So maybe you are not content to know the results of the tv show with the highest rating, you want to know more, maybe you are expecting
-to get a summary of the day, with some fancy statictics. Why don't you try to ask to our bird?
+to get a summary of the day, with some fancy statictics. Why don't you try to ask our bird?
 
 and much more...
