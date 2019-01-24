@@ -1,4 +1,4 @@
-# TV Bird Tweets! 🐦
+# TV Bird Tweets! @tvbirdtweets 🐦
 
 This is an interesting Twitter bot that tweets recent ratings of TV shows regularly and answers questions appropriately when asked.
 It always listens to your tweets and lets you ask it whatever you want. Here are some intriguing features of this smart bot:
