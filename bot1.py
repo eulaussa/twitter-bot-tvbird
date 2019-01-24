@@ -9,6 +9,17 @@ from sqlalchemy import create_engine
 fetched = False
 df = pd.DataFrame()
 
+CONSUMER_KEY = 'lCo8blI66LRA6cg7uLA9DOXXb'
+CONSUMER_SECRET = 'ZAa8hGvGNHnQnw4c7QMAckE0YCpnXShKBj4WrKkzzlHYihIuvR'
+ACCESS_KEY = '4084610115-UeC8vZ0gKwHhLTb0xBvUWdDe6uPzCuIrleKsJNU'
+ACCESS_SECRET = 'KRpT8Gad8Ze2rl2hJRnjQrEulEHgBEj2y322nyc3SHyR7'
+POSTGRESQL_USER = 'eulaussa'
+POSTGRESQL_PASSWORD = 'selmeh415?'
+POSTGRESQL_HOST_IP = 'tvratingsdb.cf1xgawgdryh.us-east-2.rds-preview.amazonaws.com'
+POSTGRESQL_PORT = '5432'
+POSTGRESQL_DATABASE = 'tvratingsDB'
+
+USER_ID = '4084610115'
 auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
 api = tweepy.API(auth)
@@ -32,8 +43,7 @@ def fetchData():
 def uploadData(df):
     now = datetime.datetime.now()
     strnow = now.strftime('%d-%m-%Y')
-    engine = create_engine('postgresql://'+POSTGRESQL_USER+':'+POSTGRESQL_PASSWORD+'@'+POSTGRESQL_HOST_IP+':'
-                           +POSTGRESQL_PORT+'/'+POSTGRESQL_DATABASE,echo=False)
+    engine = create_engine('postgresql://'+POSTGRESQL_USER+':'+POSTGRESQL_PASSWORD+'@'+POSTGRESQL_HOST_IP+':'+POSTGRESQL_PORT+'/'+POSTGRESQL_DATABASE,echo=False)
     df.to_sql(name = strnow, con = engine, if_exists = 'replace', index = True)
     print("Upload to database is successful!")
     return
@@ -41,8 +51,7 @@ def uploadData(df):
 def tweetRatings(df):
     api.update_status("Eveeet, bugünün reytingleri geliyor, kim ne izlemiş her şey teker teker ortaya çıkıyor!")
     for i in df.index:
-        tweet = str(i) + " " + df.at[i, 'BAŞLIK'] + ", Kanal: " + df.at[i, 'KANAL']+ ", Reyting: " + str(df.at[i, 'RTG']) 
-            + ", Share: " + str(df.at[i, 'SHARE'])
+        tweet = str(i) + " " + df.at[i, 'BAŞLIK'] + ", Kanal: " + df.at[i, 'KANAL']+ ", Reyting: " + str(df.at[i, 'RTG']) + ", Share: " + str(df.at[i, 'SHARE'])
         api.update_status(tweet)
         time.sleep(5)
     print("New day new tweets")
@@ -93,10 +102,10 @@ def replyTweet(df):
     print("Checking for new tweets")
     mentions = api.mentions_timeline(tweet_mode = 'extended')
     for mention in mentions:
-        if findMentionID(mention.id) == False:
+        if not findMentionID(mention.id):
+            storeMentionID(mention.id)
             if mention.full_text == '@tvbirdtweets':
                 try:
-                    storeMentionID(mention.id)
                     print('Empty mention, taking care of it.')
                     api.create_favorite(mention.id)
                     api.update_status('@' + mention.user.screen_name + ' Reytingler için takipte kalın!', mention.id)
@@ -105,11 +114,8 @@ def replyTweet(df):
             elif any(word in mention.full_text.lower() for word in words_tupple1) :
                 api.create_favorite(mention.id)
                 print("Number one was asked.")
-                tweet = ' Dünün birincisi ' + str(df.at[1,'RTG']) + ' reyting ve ' 
-                    + str(df.at[1,'SHARE']) + ' share ile ' + df.at[1, 'BAŞLIK'].title()
-                    +'! Kendilerini kutlar, Acun\'u daha iyisini yapmaya davet ederiz! Bizi tercih ettiğiniz için teşekkürler.'
+                tweet = ' Dünün birincisi ' + str(df.at[1,'RTG']) + ' reyting ve ' + str(df.at[1,'SHARE']) + ' share ile ' + df.at[1, 'BAŞLIK'].title()+'! Kendilerini kutlar, Acun\'u daha iyisini yapmaya davet ederiz! Bizi tercih ettiğiniz için teşekkürler.'
                 api.update_status('@' + mention.user.screen_name + tweet, mention.id)
-                storeMentionID(mention.id)
             elif any(word in mention.full_text.lower() for word in words_tupple2)  :
                 api.create_favorite(mention.id)
                 print("Overview of the day was asked.")
@@ -118,15 +124,10 @@ def replyTweet(df):
                 df_SHARE = df.groupby('SHARE')['RTG'].mean().sort_values(ascending = False)
                 df_SHARE = df_SHARE.reset_index()
 
-                api.update_status('@' + mention.user.screen_name 
-                                  + ' Günlük reyting istatistiklerini istediniz, sonuçlar geliyor.', mention.id)
+                api.update_status('@' + mention.user.screen_name + ' Günlük reyting istatistiklerini istediniz, sonuçlar geliyor.', mention.id)
                 time.sleep(5)
-                tweet = ' Bugün en yüksek reyting ortalamasıyla izlenen program türü ' 
-                    + str(round(df_RTG.at[0, 'RTG'],2)) + ' ortalama ile ' + beautifyWords(df_RTG.at[0, 'TÜR']) 
-                    + ' olmuş. Onları takiben ' + str(round(df_RTG.at[1, 'RTG'],2)) +  ' ile '+ beautifyWords(df_RTG.at[1, 'TÜR'])
-                    + ' ve ' + str(round(df_RTG.at[2, 'RTG'],2)) + ' ile ' + beautifyWords(df_RTG.at[2, 'TÜR']) + ' geliyor.'
+                tweet = ' Bugün en yüksek reyting ortalamasıyla izlenen program türü ' + str(round(df_RTG.at[0, 'RTG'],2)) + ' ortalama ile ' + beautifyWords(df_RTG.at[0, 'TÜR']) + ' olmuş. Onları takiben ' + str(round(df_RTG.at[1, 'RTG'],2)) +  ' ile '+ beautifyWords(df_RTG.at[1, 'TÜR']) + ' ve ' + str(round(df_RTG.at[2, 'RTG'],2)) + ' ile ' + beautifyWords(df_RTG.at[2, 'TÜR']) + ' geliyor.'
                 api.update_status('@' + mention.user.screen_name + tweet, mention.id)
-                storeMentionID(mention.id)
             elif any(word in mention.full_text.lower() for word in words_tupple3) :
                 api.create_favorite(mention.id)
                 time_diffs = []
@@ -136,18 +137,14 @@ def replyTweet(df):
                     time_diffs.append(calculateTimeDif(times))
                 result = datetime.datetime.strptime(max(time_diffs), '%H:%M:%S')
                 name = df.at[time_diffs.index(max(time_diffs)), 'BAŞLIK'].capitalize()
-                api.update_status('@' + mention.user.screen_name + ' Dünün en uzun süren programı ' 
-                                  + str(result.hour) + ' saat ' + str(result.minute) + ' dakika ile '+name+ ' olmuş.', mention.id)
-                storeMentionID(mention.id)
+                api.update_status('@' + mention.user.screen_name + ' Dünün en uzun süren programı ' + str(result.hour) + ' saat ' + str(result.minute) + ' dakika ile '+name+ ' olmuş.', mention.id)
             else:
                 api.create_favorite(mention.id)
-                api.update_status('@' + mention.user.screen_name 
-                                  + ' Bana günün birincisini ya da dünün özetini sormayı deneyebilirsiniz!', mention.id)
-                storeMentionID(mention.id)
+                api.update_status('@' + mention.user.screen_name + ' Bana günün birincisini ya da dünün özetini sormayı deneyebilirsiniz!', mention.id)
     return
 
 while True:
-    if (fetched == False):
+    if not fetched:
         df = fetchData()
         fetched = True
     if (datetime.datetime.today().hour == 13 and datetime.datetime.today().minute == 00):
