@@ -140,7 +140,7 @@ while True:
     if (fetched == False):
         df = fetchData()
         fetched = True
-    if (datetime.datetime.today().hour == 13):
+    if (datetime.datetime.today().hour == 13 and datetime.datetime.today().minute == 00):
         uploadData(df)
         tweetRatings(df)
     replyTweet(df)
