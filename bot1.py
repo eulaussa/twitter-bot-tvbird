@@ -9,17 +9,6 @@ from sqlalchemy import create_engine
 fetched = False
 df = pd.DataFrame()
 
-CONSUMER_KEY = 'lCo8blI66LRA6cg7uLA9DOXXb'
-CONSUMER_SECRET = 'ZAa8hGvGNHnQnw4c7QMAckE0YCpnXShKBj4WrKkzzlHYihIuvR'
-ACCESS_KEY = '4084610115-UeC8vZ0gKwHhLTb0xBvUWdDe6uPzCuIrleKsJNU'
-ACCESS_SECRET = 'KRpT8Gad8Ze2rl2hJRnjQrEulEHgBEj2y322nyc3SHyR7'
-POSTGRESQL_USER = 'eulaussa'
-POSTGRESQL_PASSWORD = 'selmeh415?'
-POSTGRESQL_HOST_IP = 'tvratingsdb.cf1xgawgdryh.us-east-2.rds-preview.amazonaws.com'
-POSTGRESQL_PORT = '5432'
-POSTGRESQL_DATABASE = 'tvratingsDB'
-
-USER_ID = '4084610115'
 auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
 api = tweepy.API(auth)
@@ -163,6 +152,3 @@ while True:
         tweetRatings(df)
     replyTweet(df)
     time.sleep(15)
-
-     
-    
